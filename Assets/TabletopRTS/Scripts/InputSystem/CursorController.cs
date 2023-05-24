@@ -13,7 +13,7 @@ public struct CursorControllerInputs
 public class CursorController : MonoBehaviour
 {
     public CursorControllerInputs Inputs;
-    public Transform CursorObjectTransform;
+    public Texture2D CursorTexture;
     public Texture SelectionRectangle;
     private Camera mainCamera;
     private List<GameObject> currentSelection = new List<GameObject>();
@@ -28,12 +28,11 @@ public class CursorController : MonoBehaviour
     private void Start()
     {
         mainCamera = Camera.main;
+        Cursor.SetCursor(CursorTexture, Vector2.zero, CursorMode.Auto);
     }
 
     private void Update()
     {
-        CursorObjectTransform.position = Inputs.MousePosition;
-
         if (Inputs.SelectObject.WasPerformedThisFrame())
         {
             isSelecting = true;
