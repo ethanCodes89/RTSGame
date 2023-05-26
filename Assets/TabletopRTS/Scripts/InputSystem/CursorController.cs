@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using Sirenix.OdinInspector.Editor.Examples;
-using Unity.Mathematics;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -8,18 +5,22 @@ public struct CursorControllerInputs
 {
     public Vector2 MousePosition;
     public InputAction SelectObject;
+    public bool IsShiftSelectEnabled;
 }
 
 public class CursorController : MonoBehaviour
 {
+    public SelectedUnitsManager SelectedUnitsManager;
     public CursorControllerInputs Inputs;
     public Texture2D CursorTexture;
     public Texture SelectionRectangle;
     private Camera mainCamera;
-    private List<GameObject> currentSelection = new List<GameObject>();
     private bool isSelecting = false;
     private Vector2  selectionStartPosition = Vector2.zero;
-    public List<GameObject> AllUnits = new List<GameObject>();
+    private MeshCollider selectionBox;
+    private Mesh selectionMesh;
+    private Vector2[] selectionBoxCorners;
+    private Vector3[] selectionBoxVertices;
     private void Awake()
     {
         Inputs = new CursorControllerInputs();
@@ -45,7 +46,7 @@ public class CursorController : MonoBehaviour
         }
         else if (Inputs.SelectObject.WasReleasedThisFrame())
         {
-            SelectObject();
+            SelectObject(Inputs.MousePosition);
         }
     }
 
@@ -57,63 +58,64 @@ public class CursorController : MonoBehaviour
             GUI.DrawTexture(selectionArea, SelectionRectangle);
         }
     }
-
-    private GameObject CheckForSelectable(Vector2 mousePosition)
+    
+    private void SelectObject(Vector2 mousePosition)
     {
+        if(!Inputs.IsShiftSelectEnabled) ClearAllSelection();
         Ray ray = mainCamera.ScreenPointToRay(mousePosition);
-        
-        if (Physics.Raycast(ray, out RaycastHit hit))
-        {
-            if (hit.collider.gameObject.GetComponent<BaseUnit>())
-            {
-                return hit.collider.gameObject;
-            }
-        }
-        return null;
-    }
 
-    private void SelectObject()
-    {
-        
-        GameObject hitObject = CheckForSelectable(Inputs.MousePosition);
-        ClearSelection();
-        if (hitObject)
+        if (Physics.Raycast(ray, out RaycastHit hit) && hit.collider.gameObject.TryGetComponent(out BaseSelectable selectable))
         {
-            hitObject.GetComponent<BaseUnit>().IsSelected = true;
-            currentSelection.Add(hitObject);
-            return;
+            if (selectable.IsSelected && Inputs.IsShiftSelectEnabled)
+            {
+                selectable.IsSelected = false;
+                ClearIndividualSelection(selectable);
+                return;
+            }
+            selectable.IsSelected = true;
+            SelectedUnitsManager.CurrentSelection.Add(selectable);
         }
     }
 
     private void SelectObjects(Vector2 startPosition, Vector2 endPosition)
     {
-        ClearSelection();
-        Rect rectangle = CalculateSelectionArea(startPosition, endPosition);
-        foreach (var unit in AllUnits)
+        if(!Inputs.IsShiftSelectEnabled) ClearAllSelection();
+        if (startPosition == endPosition) return; //if user did not move the mouse when selecting, return early to avoid issue with generating the rectangle
+        var verts = new Vector3[4];
+        int i = 0;
+        var corners = GenerateRectangle(startPosition, endPosition);
+        foreach (Vector2 corner in corners)
         {
-            if (rectangle.Contains(mainCamera.WorldToScreenPoint(unit.transform.position)))
+            Ray ray = mainCamera.ScreenPointToRay(corner);
+            if (Physics.Raycast(ray, out RaycastHit hit, 50000f, (1 << 8)))
             {
-                if (!currentSelection.Contains(unit))
-                {
-                    currentSelection.Add(unit);
-                    unit.GetComponent<BaseUnit>().IsSelected = true;
-                }
+                verts[i] = new Vector3(hit.point.x, 0, hit.point.z); 
             }
+            i++;
         }
+
+        selectionMesh = GenerateSelectionMesh(verts);
+        selectionBox = gameObject.AddComponent<MeshCollider>();
+        selectionBox.sharedMesh = selectionMesh;
+        selectionBox.convex = true;
+        selectionBox.isTrigger = true;
+        
+        Destroy(selectionBox, .02f);
         isSelecting = false;
     }
 
-    private void ClearSelection()
+    private void ClearAllSelection()
     {
-        foreach (GameObject selectedObject in currentSelection)
+        foreach (BaseSelectable selectedObject in SelectedUnitsManager.CurrentSelection)
         {
-            if (selectedObject != null)
-            {
-                selectedObject.GetComponent<BaseUnit>().IsSelected = false;
-            }
+            selectedObject.IsSelected = false;
         }
+        SelectedUnitsManager.CurrentSelection.Clear();
+    }
 
-        currentSelection.Clear();
+    private void ClearIndividualSelection(BaseSelectable selectedUnit)
+    {
+        SelectedUnitsManager.CurrentSelection.Remove(selectedUnit);
     }
 
     private Rect CalculateSelectionArea(Vector2 startPosition, Vector2 endPosition)
@@ -124,8 +126,86 @@ public class CursorController : MonoBehaviour
         //subtract from screen.height to convert the screen space coordinate system to the gui coordinate system - https://docs.unity3d.com/ScriptReference/Rect.html
         min.y = Screen.height - Mathf.Max(startPosition.y, endPosition.y);
         max.y = Screen.height - Mathf.Min(startPosition.y, endPosition.y);
-
+    
         return new Rect(min, max - min);
     }
+    
+    private Vector2[] GenerateRectangle(Vector2 startPosition, Vector2 endPosition)
+    {
+        Vector2 topLeft;
+        Vector2 topRight;
+        Vector2 bottomLeft;
+        Vector2 bottomRight;
 
+        if (startPosition.x < endPosition.x)
+        {
+            if (startPosition.y > endPosition.y)
+            {
+                topLeft = startPosition;
+                topRight = new Vector2(endPosition.x, startPosition.y);
+                bottomLeft = new Vector2(startPosition.x, endPosition.y);
+                bottomRight = endPosition;
+            }
+            else
+            {
+                topLeft = new Vector2(startPosition.x, endPosition.y);
+                topRight = endPosition;
+                bottomLeft = startPosition;
+                bottomRight = new Vector2(endPosition.x, startPosition.y);
+            }
+        }
+        else
+        {
+            if (startPosition.y > endPosition.y)
+            {
+                topLeft = new Vector2(endPosition.x, startPosition.y);
+                topRight = startPosition;
+                bottomLeft = endPosition;
+                bottomRight = new Vector2(startPosition.x, endPosition.y);
+            }
+            else
+            {
+                topLeft = endPosition;
+                topRight = new Vector2(startPosition.x, endPosition.y);
+                bottomLeft = new Vector2(endPosition.x, startPosition.y);
+                bottomRight = startPosition;
+            }
+        }
+
+        Vector2[] corners = { topLeft, topRight, bottomLeft, bottomRight };
+        return corners;
+    }
+
+    Mesh GenerateSelectionMesh(Vector3[] corners)
+    {
+        Vector3[] verts = new Vector3[8];
+        int[] tris = { 0, 1, 2, 2, 1, 3, 4, 6, 0, 0, 6, 2, 6, 7, 2, 2, 7, 3, 7, 5, 3, 3, 5, 1, 5, 0, 1, 1, 4, 0, 4, 5, 6, 6, 5, 7 };
+
+        for (int i = 0; i < 4; i++)
+        {
+            verts[i] = corners[i];
+        }
+
+        for (int j = 4; j < 8; j++)
+        {
+            verts[j] = corners[j - 4] + Vector3.up * 100f;
+        }
+
+        Mesh selectionMesh = new Mesh();
+        selectionMesh.vertices = verts;
+        selectionMesh.triangles = tris;
+        return selectionMesh;
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.TryGetComponent(out BaseSelectable selectable))
+        {
+            if (!SelectedUnitsManager.CurrentSelection.Contains(selectable))
+            {
+                SelectedUnitsManager.CurrentSelection.Add(selectable);
+                selectable.IsSelected = true;   
+            }
+        }
+    }
 }

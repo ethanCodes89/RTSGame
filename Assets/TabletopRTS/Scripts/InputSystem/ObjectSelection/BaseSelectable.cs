@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class BaseUnit : NetworkBehaviour
+public class BaseSelectable : NetworkBehaviour
 {
     private bool isSelected;
     

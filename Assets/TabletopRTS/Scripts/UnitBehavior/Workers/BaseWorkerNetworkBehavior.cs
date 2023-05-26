@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 using UniversalAssetsProject.Utilities;
-public class BaseWorkerNetworkBehavior : BaseUnit
+public class BaseWorkerNetworkBehavior : BaseSelectable
 {
     public StateMachine WorkerStateMachine;
 

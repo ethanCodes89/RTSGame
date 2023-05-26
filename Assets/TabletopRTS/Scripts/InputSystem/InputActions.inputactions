@@ -49,6 +49,15 @@
                     "processors": "",
                     "interactions": "Hold(duration=0.01)",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "ShiftSelectEnabled",
+                    "type": "Button",
+                    "id": "cb66c171-d8d7-4297-b7c4-52ad3b9d2798",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -280,6 +289,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "DragCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "888d02ac-00a1-4eeb-bdf4-bf299e9d4215",
+                    "path": "<Keyboard>/shift",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ShiftSelectEnabled",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

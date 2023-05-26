@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using Sirenix.OdinInspector;
 public class InputManager : MonoBehaviour
@@ -5,8 +6,14 @@ public class InputManager : MonoBehaviour
     public InputValues InputValuesReference;
     public CursorController CursorController;
     public CameraController CameraController;
-    
-    
+
+    private void Start()
+    {
+        //Set initial values
+        PullCursorControllerInputs();
+        PullCameraControllerInputs();
+    }
+
     private void Update()
     {
         PullCursorControllerInputs();
@@ -25,5 +32,6 @@ public class InputManager : MonoBehaviour
     {
         CursorController.Inputs.SelectObject = InputValuesReference.SelectObject;
         CursorController.Inputs.MousePosition = InputValuesReference.MousePosition;
+        CursorController.Inputs.IsShiftSelectEnabled = InputValuesReference.ShiftSelectEnabled;
     }
 }

@@ -1,9 +1,10 @@
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.Serialization;
 
 public class ProjectSelectionTexture : MonoBehaviour
 {
-    public BaseUnit UnitRef;
+    [FormerlySerializedAs("UnitRef")] public BaseSelectable selectableRef;
     private DecalProjector selectionProjector;
     private void Awake()
     {
@@ -12,6 +13,6 @@ public class ProjectSelectionTexture : MonoBehaviour
 
     private void Update()
     {
-        selectionProjector.gameObject.SetActive(UnitRef.IsSelected);
+        selectionProjector.gameObject.SetActive(selectableRef.IsSelected);
     }
 }

@@ -73,6 +73,15 @@ namespace TabletopRTS.InputSystem
                     ""processors"": """",
                     ""interactions"": ""Hold(duration=0.01)"",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""ShiftSelectEnabled"",
+                    ""type"": ""Button"",
+                    ""id"": ""cb66c171-d8d7-4297-b7c4-52ad3b9d2798"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -306,6 +315,17 @@ namespace TabletopRTS.InputSystem
                     ""action"": ""DragCamera"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""888d02ac-00a1-4eeb-bdf4-bf299e9d4215"",
+                    ""path"": ""<Keyboard>/shift"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""ShiftSelectEnabled"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -347,6 +367,7 @@ namespace TabletopRTS.InputSystem
             m_GameplayActions_ZoomCamera = m_GameplayActions.FindAction("ZoomCamera", throwIfNotFound: true);
             m_GameplayActions_MousePosition = m_GameplayActions.FindAction("MousePosition", throwIfNotFound: true);
             m_GameplayActions_DragCamera = m_GameplayActions.FindAction("DragCamera", throwIfNotFound: true);
+            m_GameplayActions_ShiftSelectEnabled = m_GameplayActions.FindAction("ShiftSelectEnabled", throwIfNotFound: true);
             // MenuActions
             m_MenuActions = asset.FindActionMap("MenuActions", throwIfNotFound: true);
             m_MenuActions_Newaction = m_MenuActions.FindAction("New action", throwIfNotFound: true);
@@ -416,6 +437,7 @@ namespace TabletopRTS.InputSystem
         private readonly InputAction m_GameplayActions_ZoomCamera;
         private readonly InputAction m_GameplayActions_MousePosition;
         private readonly InputAction m_GameplayActions_DragCamera;
+        private readonly InputAction m_GameplayActions_ShiftSelectEnabled;
         public struct GameplayActionsActions
         {
             private @InputActions m_Wrapper;
@@ -425,6 +447,7 @@ namespace TabletopRTS.InputSystem
             public InputAction @ZoomCamera => m_Wrapper.m_GameplayActions_ZoomCamera;
             public InputAction @MousePosition => m_Wrapper.m_GameplayActions_MousePosition;
             public InputAction @DragCamera => m_Wrapper.m_GameplayActions_DragCamera;
+            public InputAction @ShiftSelectEnabled => m_Wrapper.m_GameplayActions_ShiftSelectEnabled;
             public InputActionMap Get() { return m_Wrapper.m_GameplayActions; }
             public void Enable() { Get().Enable(); }
             public void Disable() { Get().Disable(); }
@@ -449,6 +472,9 @@ namespace TabletopRTS.InputSystem
                 @DragCamera.started += instance.OnDragCamera;
                 @DragCamera.performed += instance.OnDragCamera;
                 @DragCamera.canceled += instance.OnDragCamera;
+                @ShiftSelectEnabled.started += instance.OnShiftSelectEnabled;
+                @ShiftSelectEnabled.performed += instance.OnShiftSelectEnabled;
+                @ShiftSelectEnabled.canceled += instance.OnShiftSelectEnabled;
             }
 
             private void UnregisterCallbacks(IGameplayActionsActions instance)
@@ -468,6 +494,9 @@ namespace TabletopRTS.InputSystem
                 @DragCamera.started -= instance.OnDragCamera;
                 @DragCamera.performed -= instance.OnDragCamera;
                 @DragCamera.canceled -= instance.OnDragCamera;
+                @ShiftSelectEnabled.started -= instance.OnShiftSelectEnabled;
+                @ShiftSelectEnabled.performed -= instance.OnShiftSelectEnabled;
+                @ShiftSelectEnabled.canceled -= instance.OnShiftSelectEnabled;
             }
 
             public void RemoveCallbacks(IGameplayActionsActions instance)
@@ -538,6 +567,7 @@ namespace TabletopRTS.InputSystem
             void OnZoomCamera(InputAction.CallbackContext context);
             void OnMousePosition(InputAction.CallbackContext context);
             void OnDragCamera(InputAction.CallbackContext context);
+            void OnShiftSelectEnabled(InputAction.CallbackContext context);
         }
         public interface IMenuActionsActions
         {
