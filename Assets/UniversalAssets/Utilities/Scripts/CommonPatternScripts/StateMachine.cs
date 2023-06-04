@@ -6,6 +6,8 @@ public class StateMachine : MonoBehaviour
 
     public State CurrentState { get; private set; }
     private State nextState;
+    [SerializeField]
+    [SerializeReference]
     private State mainStateType;
 
     private void Awake()
