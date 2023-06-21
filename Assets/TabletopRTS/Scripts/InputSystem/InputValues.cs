@@ -10,8 +10,9 @@ public class InputValues : MonoBehaviour
     private InputAction mousePosition;
     private InputAction zoomCamera;
     private InputAction dragCamera;
-    private InputAction selectObject;
+    private InputAction cursorPrimaryCommand;
     private InputAction shiftSelectEnabled;
+    private InputAction setCursorMoveState;
     private void Awake()
     {
         inputActions = new InputActions();
@@ -19,8 +20,9 @@ public class InputValues : MonoBehaviour
         mousePosition = inputActions.GameplayActions.MousePosition;
         zoomCamera = inputActions.GameplayActions.ZoomCamera;
         dragCamera = inputActions.GameplayActions.DragCamera;
-        selectObject = inputActions.GameplayActions.SelectSingleObject;
+        cursorPrimaryCommand = inputActions.GameplayActions.SelectSingleObject;
         shiftSelectEnabled = inputActions.GameplayActions.ShiftSelectEnabled;
+        setCursorMoveState = inputActions.GameplayActions.SetCursorMoveState;
     }
 
     private void OnEnable()
@@ -37,6 +39,7 @@ public class InputValues : MonoBehaviour
     public Vector2 MousePosition { get { return mousePosition.ReadValue<Vector2>(); } }
     public Vector2 ZoomCamera { get { return zoomCamera.ReadValue<Vector2>(); } }
     public InputAction DragCamera { get { return dragCamera; } }
-    public InputAction SelectObject { get { return selectObject; } }
+    public InputAction CursorPrimaryCommand { get { return cursorPrimaryCommand; } }
     public bool ShiftSelectEnabled { get { return shiftSelectEnabled.IsPressed(); } }
+    public bool SetCursorMoveState { get { return setCursorMoveState.WasPerformedThisFrame(); } }
 }

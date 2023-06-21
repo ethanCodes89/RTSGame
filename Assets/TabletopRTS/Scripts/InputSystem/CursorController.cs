@@ -1,15 +1,27 @@
+using TabletopRTS.Scripts.UnitBehavior;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 public struct CursorControllerInputs
 {
     public Vector2 MousePosition;
-    public InputAction SelectObject;
+    public InputAction CursorPrimaryCommand;
     public bool IsShiftSelectEnabled;
+    public CursorState CurrentState;
+}
+
+public enum CursorState
+{
+    SelectCommand,
+    MoveCommand,
+    AttackCommand,
+    DefendCommand,
+    WaitCommand
 }
 
 public class CursorController : MonoBehaviour
 {
+
     public SelectedUnitsManager SelectedUnitsManager;
     public CursorControllerInputs Inputs;
     public Texture2D CursorTexture;
@@ -34,28 +46,70 @@ public class CursorController : MonoBehaviour
 
     private void Update()
     {
-        if (Inputs.SelectObject.WasPerformedThisFrame())
+        switch (Inputs.CurrentState)
+        {
+            case CursorState.SelectCommand:
+                HandleObjectSelection();
+                break;
+            case CursorState.MoveCommand:
+                HandleMoveCommand();
+                break;
+            default:
+                Inputs.CurrentState = CursorState.SelectCommand;
+                HandleObjectSelection();
+                break;
+        }
+
+    }
+
+    private void OnGUI()
+    {
+        if (Inputs.CursorPrimaryCommand.IsPressed() && isSelecting)
+        {
+            Rect selectionArea = CalculateSelectionArea(selectionStartPosition, Inputs.MousePosition);
+            GUI.DrawTexture(selectionArea, SelectionRectangle);
+        }
+    }
+
+    private void HandleMoveCommand()
+    {
+        if (!Inputs.CursorPrimaryCommand.WasPressedThisFrame())
+            return;
+        foreach (var unit in SelectedUnitsManager.CurrentSelection)
+        {
+            if (unit.TryGetComponent(out MoveComponent moveComponent))
+            {
+                Ray ray = mainCamera.ScreenPointToRay(Inputs.MousePosition);
+
+                if (Physics.Raycast(ray, out RaycastHit hit, 50000f, (1 << 8)))
+                {
+                    moveComponent.SetDestination(hit.point);   
+                }
+            }
+            Inputs.CurrentState = CursorState.SelectCommand;
+        }
+    }
+
+    private void HandleAttackCommand()
+    {
+
+    }
+
+    private void HandleObjectSelection()
+    {
+        if (Inputs.CursorPrimaryCommand.WasPerformedThisFrame())
         {
             isSelecting = true;
             selectionStartPosition = Inputs.MousePosition;
 
         }
-        else if (Inputs.SelectObject.WasReleasedThisFrame() && isSelecting)
+        else if (Inputs.CursorPrimaryCommand.WasReleasedThisFrame() && isSelecting)
         {
             SelectObjects(selectionStartPosition, Inputs.MousePosition);
         }
-        else if (Inputs.SelectObject.WasReleasedThisFrame())
+        else if (Inputs.CursorPrimaryCommand.WasReleasedThisFrame())
         {
             SelectObject(Inputs.MousePosition);
-        }
-    }
-
-    private void OnGUI()
-    {
-        if (Inputs.SelectObject.IsPressed() && isSelecting)
-        {
-            Rect selectionArea = CalculateSelectionArea(selectionStartPosition, Inputs.MousePosition);
-            GUI.DrawTexture(selectionArea, SelectionRectangle);
         }
     }
     
@@ -64,16 +118,16 @@ public class CursorController : MonoBehaviour
         if(!Inputs.IsShiftSelectEnabled) ClearAllSelection();
         Ray ray = mainCamera.ScreenPointToRay(mousePosition);
 
-        if (Physics.Raycast(ray, out RaycastHit hit) && hit.collider.gameObject.TryGetComponent(out BaseSelectable selectable))
+        if (Physics.Raycast(ray, out RaycastHit hit) && hit.collider.gameObject.TryGetComponent(out IUnit selectable))
         {
             if (selectable.IsSelected && Inputs.IsShiftSelectEnabled)
             {
                 selectable.IsSelected = false;
-                ClearIndividualSelection(selectable);
+                ClearIndividualSelection(hit.collider.gameObject);
                 return;
             }
             selectable.IsSelected = true;
-            SelectedUnitsManager.CurrentSelection.Add(selectable);
+            SelectedUnitsManager.CurrentSelection.Add(hit.collider.gameObject);
         }
     }
 
@@ -106,14 +160,14 @@ public class CursorController : MonoBehaviour
 
     private void ClearAllSelection()
     {
-        foreach (BaseSelectable selectedObject in SelectedUnitsManager.CurrentSelection)
+        foreach (GameObject selectedObject in SelectedUnitsManager.CurrentSelection)
         {
-            selectedObject.IsSelected = false;
+            selectedObject.GetComponent<IUnit>().IsSelected = false;
         }
         SelectedUnitsManager.CurrentSelection.Clear();
     }
 
-    private void ClearIndividualSelection(BaseSelectable selectedUnit)
+    private void ClearIndividualSelection(GameObject selectedUnit)
     {
         SelectedUnitsManager.CurrentSelection.Remove(selectedUnit);
     }
@@ -199,11 +253,11 @@ public class CursorController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.TryGetComponent(out BaseSelectable selectable))
+        if (other.gameObject.TryGetComponent(out IUnit selectable))
         {
-            if (!SelectedUnitsManager.CurrentSelection.Contains(selectable))
+            if (!SelectedUnitsManager.CurrentSelection.Contains(other.gameObject))
             {
-                SelectedUnitsManager.CurrentSelection.Add(selectable);
+                SelectedUnitsManager.CurrentSelection.Add(other.gameObject);
                 selectable.IsSelected = true;   
             }
         }

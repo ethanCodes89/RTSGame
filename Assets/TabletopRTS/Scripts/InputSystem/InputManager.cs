@@ -30,8 +30,18 @@ public class InputManager : MonoBehaviour
     }
     private void PullCursorControllerInputs()
     {
-        CursorController.Inputs.SelectObject = InputValuesReference.SelectObject;
+        CursorController.Inputs.CursorPrimaryCommand = InputValuesReference.CursorPrimaryCommand;
         CursorController.Inputs.MousePosition = InputValuesReference.MousePosition;
         CursorController.Inputs.IsShiftSelectEnabled = InputValuesReference.ShiftSelectEnabled;
+        HandleCursorState();
     }
+
+    private void HandleCursorState()
+    {
+        if (InputValuesReference.SetCursorMoveState)
+        {
+            CursorController.Inputs.CurrentState = CursorState.MoveCommand;
+        }
+    }
+    
 }
