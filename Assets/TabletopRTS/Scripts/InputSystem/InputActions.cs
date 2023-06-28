@@ -15,14 +15,12 @@ using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using UnityEngine.InputSystem.Utilities;
 
-namespace TabletopRTS.InputSystem
+public partial class @InputActions: IInputActionCollection2, IDisposable
 {
-    public partial class @InputActions: IInputActionCollection2, IDisposable
+    public InputActionAsset asset { get; }
+    public @InputActions()
     {
-        public InputActionAsset asset { get; }
-        public @InputActions()
-        {
-            asset = InputActionAsset.FromJson(@"{
+        asset = InputActionAsset.FromJson(@"{
     ""name"": ""InputActions"",
     ""maps"": [
         {
@@ -30,9 +28,18 @@ namespace TabletopRTS.InputSystem
             ""id"": ""8998e742-94c3-41c3-b8f3-2ff03aa5b58b"",
             ""actions"": [
                 {
-                    ""name"": ""SelectSingleObject"",
+                    ""name"": ""PrimaryCursorCommand"",
                     ""type"": ""PassThrough"",
                     ""id"": ""e94fea9d-6d4e-4309-8d8f-6e24507299e8"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""SecondaryCursorCommand"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""84e6d7b0-3416-4f59-8c2a-8d100db19102"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -101,7 +108,7 @@ namespace TabletopRTS.InputSystem
                     ""interactions"": ""Hold(duration=0.1)"",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""SelectSingleObject"",
+                    ""action"": ""PrimaryCursorCommand"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -112,7 +119,7 @@ namespace TabletopRTS.InputSystem
                     ""interactions"": ""Hold(duration=0.2)"",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""SelectSingleObject"",
+                    ""action"": ""PrimaryCursorCommand"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 },
@@ -306,7 +313,7 @@ namespace TabletopRTS.InputSystem
                 {
                     ""name"": """",
                     ""id"": ""68417bfe-23b1-43cc-a5e6-b530bb44d2be"",
-                    ""path"": ""<Mouse>/rightButton"",
+                    ""path"": ""<Mouse>/middleButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -346,6 +353,17 @@ namespace TabletopRTS.InputSystem
                     ""action"": ""SetCursorMoveState"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""1783aae4-932b-4bb4-811a-ed8c0174d999"",
+                    ""path"": ""<Mouse>/rightButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""SecondaryCursorCommand"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         },
@@ -380,228 +398,237 @@ namespace TabletopRTS.InputSystem
     ],
     ""controlSchemes"": []
 }");
-            // GameplayActions
-            m_GameplayActions = asset.FindActionMap("GameplayActions", throwIfNotFound: true);
-            m_GameplayActions_SelectSingleObject = m_GameplayActions.FindAction("SelectSingleObject", throwIfNotFound: true);
-            m_GameplayActions_MoveCamera = m_GameplayActions.FindAction("MoveCamera", throwIfNotFound: true);
-            m_GameplayActions_ZoomCamera = m_GameplayActions.FindAction("ZoomCamera", throwIfNotFound: true);
-            m_GameplayActions_MousePosition = m_GameplayActions.FindAction("MousePosition", throwIfNotFound: true);
-            m_GameplayActions_DragCamera = m_GameplayActions.FindAction("DragCamera", throwIfNotFound: true);
-            m_GameplayActions_ShiftSelectEnabled = m_GameplayActions.FindAction("ShiftSelectEnabled", throwIfNotFound: true);
-            m_GameplayActions_SetCursorMoveState = m_GameplayActions.FindAction("SetCursorMoveState", throwIfNotFound: true);
-            // MenuActions
-            m_MenuActions = asset.FindActionMap("MenuActions", throwIfNotFound: true);
-            m_MenuActions_Newaction = m_MenuActions.FindAction("New action", throwIfNotFound: true);
-        }
-
-        public void Dispose()
-        {
-            UnityEngine.Object.Destroy(asset);
-        }
-
-        public InputBinding? bindingMask
-        {
-            get => asset.bindingMask;
-            set => asset.bindingMask = value;
-        }
-
-        public ReadOnlyArray<InputDevice>? devices
-        {
-            get => asset.devices;
-            set => asset.devices = value;
-        }
-
-        public ReadOnlyArray<InputControlScheme> controlSchemes => asset.controlSchemes;
-
-        public bool Contains(InputAction action)
-        {
-            return asset.Contains(action);
-        }
-
-        public IEnumerator<InputAction> GetEnumerator()
-        {
-            return asset.GetEnumerator();
-        }
-
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
-
-        public void Enable()
-        {
-            asset.Enable();
-        }
-
-        public void Disable()
-        {
-            asset.Disable();
-        }
-
-        public IEnumerable<InputBinding> bindings => asset.bindings;
-
-        public InputAction FindAction(string actionNameOrId, bool throwIfNotFound = false)
-        {
-            return asset.FindAction(actionNameOrId, throwIfNotFound);
-        }
-
-        public int FindBinding(InputBinding bindingMask, out InputAction action)
-        {
-            return asset.FindBinding(bindingMask, out action);
-        }
-
         // GameplayActions
-        private readonly InputActionMap m_GameplayActions;
-        private List<IGameplayActionsActions> m_GameplayActionsActionsCallbackInterfaces = new List<IGameplayActionsActions>();
-        private readonly InputAction m_GameplayActions_SelectSingleObject;
-        private readonly InputAction m_GameplayActions_MoveCamera;
-        private readonly InputAction m_GameplayActions_ZoomCamera;
-        private readonly InputAction m_GameplayActions_MousePosition;
-        private readonly InputAction m_GameplayActions_DragCamera;
-        private readonly InputAction m_GameplayActions_ShiftSelectEnabled;
-        private readonly InputAction m_GameplayActions_SetCursorMoveState;
-        public struct GameplayActionsActions
-        {
-            private @InputActions m_Wrapper;
-            public GameplayActionsActions(@InputActions wrapper) { m_Wrapper = wrapper; }
-            public InputAction @SelectSingleObject => m_Wrapper.m_GameplayActions_SelectSingleObject;
-            public InputAction @MoveCamera => m_Wrapper.m_GameplayActions_MoveCamera;
-            public InputAction @ZoomCamera => m_Wrapper.m_GameplayActions_ZoomCamera;
-            public InputAction @MousePosition => m_Wrapper.m_GameplayActions_MousePosition;
-            public InputAction @DragCamera => m_Wrapper.m_GameplayActions_DragCamera;
-            public InputAction @ShiftSelectEnabled => m_Wrapper.m_GameplayActions_ShiftSelectEnabled;
-            public InputAction @SetCursorMoveState => m_Wrapper.m_GameplayActions_SetCursorMoveState;
-            public InputActionMap Get() { return m_Wrapper.m_GameplayActions; }
-            public void Enable() { Get().Enable(); }
-            public void Disable() { Get().Disable(); }
-            public bool enabled => Get().enabled;
-            public static implicit operator InputActionMap(GameplayActionsActions set) { return set.Get(); }
-            public void AddCallbacks(IGameplayActionsActions instance)
-            {
-                if (instance == null || m_Wrapper.m_GameplayActionsActionsCallbackInterfaces.Contains(instance)) return;
-                m_Wrapper.m_GameplayActionsActionsCallbackInterfaces.Add(instance);
-                @SelectSingleObject.started += instance.OnSelectSingleObject;
-                @SelectSingleObject.performed += instance.OnSelectSingleObject;
-                @SelectSingleObject.canceled += instance.OnSelectSingleObject;
-                @MoveCamera.started += instance.OnMoveCamera;
-                @MoveCamera.performed += instance.OnMoveCamera;
-                @MoveCamera.canceled += instance.OnMoveCamera;
-                @ZoomCamera.started += instance.OnZoomCamera;
-                @ZoomCamera.performed += instance.OnZoomCamera;
-                @ZoomCamera.canceled += instance.OnZoomCamera;
-                @MousePosition.started += instance.OnMousePosition;
-                @MousePosition.performed += instance.OnMousePosition;
-                @MousePosition.canceled += instance.OnMousePosition;
-                @DragCamera.started += instance.OnDragCamera;
-                @DragCamera.performed += instance.OnDragCamera;
-                @DragCamera.canceled += instance.OnDragCamera;
-                @ShiftSelectEnabled.started += instance.OnShiftSelectEnabled;
-                @ShiftSelectEnabled.performed += instance.OnShiftSelectEnabled;
-                @ShiftSelectEnabled.canceled += instance.OnShiftSelectEnabled;
-                @SetCursorMoveState.started += instance.OnSetCursorMoveState;
-                @SetCursorMoveState.performed += instance.OnSetCursorMoveState;
-                @SetCursorMoveState.canceled += instance.OnSetCursorMoveState;
-            }
-
-            private void UnregisterCallbacks(IGameplayActionsActions instance)
-            {
-                @SelectSingleObject.started -= instance.OnSelectSingleObject;
-                @SelectSingleObject.performed -= instance.OnSelectSingleObject;
-                @SelectSingleObject.canceled -= instance.OnSelectSingleObject;
-                @MoveCamera.started -= instance.OnMoveCamera;
-                @MoveCamera.performed -= instance.OnMoveCamera;
-                @MoveCamera.canceled -= instance.OnMoveCamera;
-                @ZoomCamera.started -= instance.OnZoomCamera;
-                @ZoomCamera.performed -= instance.OnZoomCamera;
-                @ZoomCamera.canceled -= instance.OnZoomCamera;
-                @MousePosition.started -= instance.OnMousePosition;
-                @MousePosition.performed -= instance.OnMousePosition;
-                @MousePosition.canceled -= instance.OnMousePosition;
-                @DragCamera.started -= instance.OnDragCamera;
-                @DragCamera.performed -= instance.OnDragCamera;
-                @DragCamera.canceled -= instance.OnDragCamera;
-                @ShiftSelectEnabled.started -= instance.OnShiftSelectEnabled;
-                @ShiftSelectEnabled.performed -= instance.OnShiftSelectEnabled;
-                @ShiftSelectEnabled.canceled -= instance.OnShiftSelectEnabled;
-                @SetCursorMoveState.started -= instance.OnSetCursorMoveState;
-                @SetCursorMoveState.performed -= instance.OnSetCursorMoveState;
-                @SetCursorMoveState.canceled -= instance.OnSetCursorMoveState;
-            }
-
-            public void RemoveCallbacks(IGameplayActionsActions instance)
-            {
-                if (m_Wrapper.m_GameplayActionsActionsCallbackInterfaces.Remove(instance))
-                    UnregisterCallbacks(instance);
-            }
-
-            public void SetCallbacks(IGameplayActionsActions instance)
-            {
-                foreach (var item in m_Wrapper.m_GameplayActionsActionsCallbackInterfaces)
-                    UnregisterCallbacks(item);
-                m_Wrapper.m_GameplayActionsActionsCallbackInterfaces.Clear();
-                AddCallbacks(instance);
-            }
-        }
-        public GameplayActionsActions @GameplayActions => new GameplayActionsActions(this);
-
+        m_GameplayActions = asset.FindActionMap("GameplayActions", throwIfNotFound: true);
+        m_GameplayActions_PrimaryCursorCommand = m_GameplayActions.FindAction("PrimaryCursorCommand", throwIfNotFound: true);
+        m_GameplayActions_SecondaryCursorCommand = m_GameplayActions.FindAction("SecondaryCursorCommand", throwIfNotFound: true);
+        m_GameplayActions_MoveCamera = m_GameplayActions.FindAction("MoveCamera", throwIfNotFound: true);
+        m_GameplayActions_ZoomCamera = m_GameplayActions.FindAction("ZoomCamera", throwIfNotFound: true);
+        m_GameplayActions_MousePosition = m_GameplayActions.FindAction("MousePosition", throwIfNotFound: true);
+        m_GameplayActions_DragCamera = m_GameplayActions.FindAction("DragCamera", throwIfNotFound: true);
+        m_GameplayActions_ShiftSelectEnabled = m_GameplayActions.FindAction("ShiftSelectEnabled", throwIfNotFound: true);
+        m_GameplayActions_SetCursorMoveState = m_GameplayActions.FindAction("SetCursorMoveState", throwIfNotFound: true);
         // MenuActions
-        private readonly InputActionMap m_MenuActions;
-        private List<IMenuActionsActions> m_MenuActionsActionsCallbackInterfaces = new List<IMenuActionsActions>();
-        private readonly InputAction m_MenuActions_Newaction;
-        public struct MenuActionsActions
-        {
-            private @InputActions m_Wrapper;
-            public MenuActionsActions(@InputActions wrapper) { m_Wrapper = wrapper; }
-            public InputAction @Newaction => m_Wrapper.m_MenuActions_Newaction;
-            public InputActionMap Get() { return m_Wrapper.m_MenuActions; }
-            public void Enable() { Get().Enable(); }
-            public void Disable() { Get().Disable(); }
-            public bool enabled => Get().enabled;
-            public static implicit operator InputActionMap(MenuActionsActions set) { return set.Get(); }
-            public void AddCallbacks(IMenuActionsActions instance)
-            {
-                if (instance == null || m_Wrapper.m_MenuActionsActionsCallbackInterfaces.Contains(instance)) return;
-                m_Wrapper.m_MenuActionsActionsCallbackInterfaces.Add(instance);
-                @Newaction.started += instance.OnNewaction;
-                @Newaction.performed += instance.OnNewaction;
-                @Newaction.canceled += instance.OnNewaction;
-            }
+        m_MenuActions = asset.FindActionMap("MenuActions", throwIfNotFound: true);
+        m_MenuActions_Newaction = m_MenuActions.FindAction("New action", throwIfNotFound: true);
+    }
 
-            private void UnregisterCallbacks(IMenuActionsActions instance)
-            {
-                @Newaction.started -= instance.OnNewaction;
-                @Newaction.performed -= instance.OnNewaction;
-                @Newaction.canceled -= instance.OnNewaction;
-            }
+    public void Dispose()
+    {
+        UnityEngine.Object.Destroy(asset);
+    }
 
-            public void RemoveCallbacks(IMenuActionsActions instance)
-            {
-                if (m_Wrapper.m_MenuActionsActionsCallbackInterfaces.Remove(instance))
-                    UnregisterCallbacks(instance);
-            }
+    public InputBinding? bindingMask
+    {
+        get => asset.bindingMask;
+        set => asset.bindingMask = value;
+    }
 
-            public void SetCallbacks(IMenuActionsActions instance)
-            {
-                foreach (var item in m_Wrapper.m_MenuActionsActionsCallbackInterfaces)
-                    UnregisterCallbacks(item);
-                m_Wrapper.m_MenuActionsActionsCallbackInterfaces.Clear();
-                AddCallbacks(instance);
-            }
-        }
-        public MenuActionsActions @MenuActions => new MenuActionsActions(this);
-        public interface IGameplayActionsActions
+    public ReadOnlyArray<InputDevice>? devices
+    {
+        get => asset.devices;
+        set => asset.devices = value;
+    }
+
+    public ReadOnlyArray<InputControlScheme> controlSchemes => asset.controlSchemes;
+
+    public bool Contains(InputAction action)
+    {
+        return asset.Contains(action);
+    }
+
+    public IEnumerator<InputAction> GetEnumerator()
+    {
+        return asset.GetEnumerator();
+    }
+
+    IEnumerator IEnumerable.GetEnumerator()
+    {
+        return GetEnumerator();
+    }
+
+    public void Enable()
+    {
+        asset.Enable();
+    }
+
+    public void Disable()
+    {
+        asset.Disable();
+    }
+
+    public IEnumerable<InputBinding> bindings => asset.bindings;
+
+    public InputAction FindAction(string actionNameOrId, bool throwIfNotFound = false)
+    {
+        return asset.FindAction(actionNameOrId, throwIfNotFound);
+    }
+
+    public int FindBinding(InputBinding bindingMask, out InputAction action)
+    {
+        return asset.FindBinding(bindingMask, out action);
+    }
+
+    // GameplayActions
+    private readonly InputActionMap m_GameplayActions;
+    private List<IGameplayActionsActions> m_GameplayActionsActionsCallbackInterfaces = new List<IGameplayActionsActions>();
+    private readonly InputAction m_GameplayActions_PrimaryCursorCommand;
+    private readonly InputAction m_GameplayActions_SecondaryCursorCommand;
+    private readonly InputAction m_GameplayActions_MoveCamera;
+    private readonly InputAction m_GameplayActions_ZoomCamera;
+    private readonly InputAction m_GameplayActions_MousePosition;
+    private readonly InputAction m_GameplayActions_DragCamera;
+    private readonly InputAction m_GameplayActions_ShiftSelectEnabled;
+    private readonly InputAction m_GameplayActions_SetCursorMoveState;
+    public struct GameplayActionsActions
+    {
+        private @InputActions m_Wrapper;
+        public GameplayActionsActions(@InputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @PrimaryCursorCommand => m_Wrapper.m_GameplayActions_PrimaryCursorCommand;
+        public InputAction @SecondaryCursorCommand => m_Wrapper.m_GameplayActions_SecondaryCursorCommand;
+        public InputAction @MoveCamera => m_Wrapper.m_GameplayActions_MoveCamera;
+        public InputAction @ZoomCamera => m_Wrapper.m_GameplayActions_ZoomCamera;
+        public InputAction @MousePosition => m_Wrapper.m_GameplayActions_MousePosition;
+        public InputAction @DragCamera => m_Wrapper.m_GameplayActions_DragCamera;
+        public InputAction @ShiftSelectEnabled => m_Wrapper.m_GameplayActions_ShiftSelectEnabled;
+        public InputAction @SetCursorMoveState => m_Wrapper.m_GameplayActions_SetCursorMoveState;
+        public InputActionMap Get() { return m_Wrapper.m_GameplayActions; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(GameplayActionsActions set) { return set.Get(); }
+        public void AddCallbacks(IGameplayActionsActions instance)
         {
-            void OnSelectSingleObject(InputAction.CallbackContext context);
-            void OnMoveCamera(InputAction.CallbackContext context);
-            void OnZoomCamera(InputAction.CallbackContext context);
-            void OnMousePosition(InputAction.CallbackContext context);
-            void OnDragCamera(InputAction.CallbackContext context);
-            void OnShiftSelectEnabled(InputAction.CallbackContext context);
-            void OnSetCursorMoveState(InputAction.CallbackContext context);
+            if (instance == null || m_Wrapper.m_GameplayActionsActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_GameplayActionsActionsCallbackInterfaces.Add(instance);
+            @PrimaryCursorCommand.started += instance.OnPrimaryCursorCommand;
+            @PrimaryCursorCommand.performed += instance.OnPrimaryCursorCommand;
+            @PrimaryCursorCommand.canceled += instance.OnPrimaryCursorCommand;
+            @SecondaryCursorCommand.started += instance.OnSecondaryCursorCommand;
+            @SecondaryCursorCommand.performed += instance.OnSecondaryCursorCommand;
+            @SecondaryCursorCommand.canceled += instance.OnSecondaryCursorCommand;
+            @MoveCamera.started += instance.OnMoveCamera;
+            @MoveCamera.performed += instance.OnMoveCamera;
+            @MoveCamera.canceled += instance.OnMoveCamera;
+            @ZoomCamera.started += instance.OnZoomCamera;
+            @ZoomCamera.performed += instance.OnZoomCamera;
+            @ZoomCamera.canceled += instance.OnZoomCamera;
+            @MousePosition.started += instance.OnMousePosition;
+            @MousePosition.performed += instance.OnMousePosition;
+            @MousePosition.canceled += instance.OnMousePosition;
+            @DragCamera.started += instance.OnDragCamera;
+            @DragCamera.performed += instance.OnDragCamera;
+            @DragCamera.canceled += instance.OnDragCamera;
+            @ShiftSelectEnabled.started += instance.OnShiftSelectEnabled;
+            @ShiftSelectEnabled.performed += instance.OnShiftSelectEnabled;
+            @ShiftSelectEnabled.canceled += instance.OnShiftSelectEnabled;
+            @SetCursorMoveState.started += instance.OnSetCursorMoveState;
+            @SetCursorMoveState.performed += instance.OnSetCursorMoveState;
+            @SetCursorMoveState.canceled += instance.OnSetCursorMoveState;
         }
-        public interface IMenuActionsActions
+
+        private void UnregisterCallbacks(IGameplayActionsActions instance)
         {
-            void OnNewaction(InputAction.CallbackContext context);
+            @PrimaryCursorCommand.started -= instance.OnPrimaryCursorCommand;
+            @PrimaryCursorCommand.performed -= instance.OnPrimaryCursorCommand;
+            @PrimaryCursorCommand.canceled -= instance.OnPrimaryCursorCommand;
+            @SecondaryCursorCommand.started -= instance.OnSecondaryCursorCommand;
+            @SecondaryCursorCommand.performed -= instance.OnSecondaryCursorCommand;
+            @SecondaryCursorCommand.canceled -= instance.OnSecondaryCursorCommand;
+            @MoveCamera.started -= instance.OnMoveCamera;
+            @MoveCamera.performed -= instance.OnMoveCamera;
+            @MoveCamera.canceled -= instance.OnMoveCamera;
+            @ZoomCamera.started -= instance.OnZoomCamera;
+            @ZoomCamera.performed -= instance.OnZoomCamera;
+            @ZoomCamera.canceled -= instance.OnZoomCamera;
+            @MousePosition.started -= instance.OnMousePosition;
+            @MousePosition.performed -= instance.OnMousePosition;
+            @MousePosition.canceled -= instance.OnMousePosition;
+            @DragCamera.started -= instance.OnDragCamera;
+            @DragCamera.performed -= instance.OnDragCamera;
+            @DragCamera.canceled -= instance.OnDragCamera;
+            @ShiftSelectEnabled.started -= instance.OnShiftSelectEnabled;
+            @ShiftSelectEnabled.performed -= instance.OnShiftSelectEnabled;
+            @ShiftSelectEnabled.canceled -= instance.OnShiftSelectEnabled;
+            @SetCursorMoveState.started -= instance.OnSetCursorMoveState;
+            @SetCursorMoveState.performed -= instance.OnSetCursorMoveState;
+            @SetCursorMoveState.canceled -= instance.OnSetCursorMoveState;
         }
+
+        public void RemoveCallbacks(IGameplayActionsActions instance)
+        {
+            if (m_Wrapper.m_GameplayActionsActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IGameplayActionsActions instance)
+        {
+            foreach (var item in m_Wrapper.m_GameplayActionsActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_GameplayActionsActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public GameplayActionsActions @GameplayActions => new GameplayActionsActions(this);
+
+    // MenuActions
+    private readonly InputActionMap m_MenuActions;
+    private List<IMenuActionsActions> m_MenuActionsActionsCallbackInterfaces = new List<IMenuActionsActions>();
+    private readonly InputAction m_MenuActions_Newaction;
+    public struct MenuActionsActions
+    {
+        private @InputActions m_Wrapper;
+        public MenuActionsActions(@InputActions wrapper) { m_Wrapper = wrapper; }
+        public InputAction @Newaction => m_Wrapper.m_MenuActions_Newaction;
+        public InputActionMap Get() { return m_Wrapper.m_MenuActions; }
+        public void Enable() { Get().Enable(); }
+        public void Disable() { Get().Disable(); }
+        public bool enabled => Get().enabled;
+        public static implicit operator InputActionMap(MenuActionsActions set) { return set.Get(); }
+        public void AddCallbacks(IMenuActionsActions instance)
+        {
+            if (instance == null || m_Wrapper.m_MenuActionsActionsCallbackInterfaces.Contains(instance)) return;
+            m_Wrapper.m_MenuActionsActionsCallbackInterfaces.Add(instance);
+            @Newaction.started += instance.OnNewaction;
+            @Newaction.performed += instance.OnNewaction;
+            @Newaction.canceled += instance.OnNewaction;
+        }
+
+        private void UnregisterCallbacks(IMenuActionsActions instance)
+        {
+            @Newaction.started -= instance.OnNewaction;
+            @Newaction.performed -= instance.OnNewaction;
+            @Newaction.canceled -= instance.OnNewaction;
+        }
+
+        public void RemoveCallbacks(IMenuActionsActions instance)
+        {
+            if (m_Wrapper.m_MenuActionsActionsCallbackInterfaces.Remove(instance))
+                UnregisterCallbacks(instance);
+        }
+
+        public void SetCallbacks(IMenuActionsActions instance)
+        {
+            foreach (var item in m_Wrapper.m_MenuActionsActionsCallbackInterfaces)
+                UnregisterCallbacks(item);
+            m_Wrapper.m_MenuActionsActionsCallbackInterfaces.Clear();
+            AddCallbacks(instance);
+        }
+    }
+    public MenuActionsActions @MenuActions => new MenuActionsActions(this);
+    public interface IGameplayActionsActions
+    {
+        void OnPrimaryCursorCommand(InputAction.CallbackContext context);
+        void OnSecondaryCursorCommand(InputAction.CallbackContext context);
+        void OnMoveCamera(InputAction.CallbackContext context);
+        void OnZoomCamera(InputAction.CallbackContext context);
+        void OnMousePosition(InputAction.CallbackContext context);
+        void OnDragCamera(InputAction.CallbackContext context);
+        void OnShiftSelectEnabled(InputAction.CallbackContext context);
+        void OnSetCursorMoveState(InputAction.CallbackContext context);
+    }
+    public interface IMenuActionsActions
+    {
+        void OnNewaction(InputAction.CallbackContext context);
     }
 }

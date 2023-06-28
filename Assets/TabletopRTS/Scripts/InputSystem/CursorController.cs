@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Linq;
+using Sirenix.Utilities;
 using TabletopRTS.Scripts.UnitBehavior;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -6,6 +9,7 @@ public struct CursorControllerInputs
 {
     public Vector2 MousePosition;
     public InputAction CursorPrimaryCommand;
+    public InputAction CursorSecondaryCommand;
     public bool IsShiftSelectEnabled;
     public CursorState CurrentState;
 }
@@ -27,7 +31,7 @@ public class CursorController : MonoBehaviour
     public Texture2D CursorTexture;
     public Texture SelectionRectangle;
     private Camera mainCamera;
-    private bool isSelecting = false;
+    private bool isSelecting;
     private Vector2  selectionStartPosition = Vector2.zero;
     private MeshCollider selectionBox;
     private Mesh selectionMesh;
@@ -46,6 +50,8 @@ public class CursorController : MonoBehaviour
 
     private void Update()
     {
+        HandleFinalStateUpdates();
+        
         switch (Inputs.CurrentState)
         {
             case CursorState.SelectCommand:
@@ -56,10 +62,26 @@ public class CursorController : MonoBehaviour
                 break;
             default:
                 Inputs.CurrentState = CursorState.SelectCommand;
-                HandleObjectSelection();
                 break;
         }
+    }
 
+    private void HandleFinalStateUpdates()
+    {
+        if (Inputs.CursorSecondaryCommand.WasPressedThisFrame())
+        {
+            Ray ray = mainCamera.ScreenPointToRay(Inputs.MousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit) &&
+                hit.collider.gameObject
+                    .TryGetComponent(out IUnit selectable)) //update this later with enemy class instead of selectable
+            {
+                return; //TODO:Update this later with setting to AttackCommand state
+            }
+            else
+            {
+                Inputs.CurrentState = CursorState.MoveCommand;
+            }
+        }
     }
 
     private void OnGUI()
@@ -73,8 +95,9 @@ public class CursorController : MonoBehaviour
 
     private void HandleMoveCommand()
     {
-        if (!Inputs.CursorPrimaryCommand.WasPressedThisFrame())
-            return;
+        if (!Inputs.CursorPrimaryCommand.WasPerformedThisFrame() &&
+            !Inputs.CursorSecondaryCommand.WasPerformedThisFrame()) return;
+        
         foreach (var unit in SelectedUnitsManager.CurrentSelection)
         {
             if (unit.TryGetComponent(out MoveComponent moveComponent))
@@ -86,13 +109,8 @@ public class CursorController : MonoBehaviour
                     moveComponent.SetDestination(hit.point);   
                 }
             }
-            Inputs.CurrentState = CursorState.SelectCommand;
         }
-    }
-
-    private void HandleAttackCommand()
-    {
-
+        Inputs.CurrentState = CursorState.SelectCommand;
     }
 
     private void HandleObjectSelection()
@@ -101,21 +119,21 @@ public class CursorController : MonoBehaviour
         {
             isSelecting = true;
             selectionStartPosition = Inputs.MousePosition;
-
         }
         else if (Inputs.CursorPrimaryCommand.WasReleasedThisFrame() && isSelecting)
         {
             SelectObjects(selectionStartPosition, Inputs.MousePosition);
+            isSelecting = false;
         }
         else if (Inputs.CursorPrimaryCommand.WasReleasedThisFrame())
         {
             SelectObject(Inputs.MousePosition);
+            isSelecting = false;
         }
     }
     
     private void SelectObject(Vector2 mousePosition)
     {
-        if(!Inputs.IsShiftSelectEnabled) ClearAllSelection();
         Ray ray = mainCamera.ScreenPointToRay(mousePosition);
 
         if (Physics.Raycast(ray, out RaycastHit hit) && hit.collider.gameObject.TryGetComponent(out IUnit selectable))
@@ -126,15 +144,19 @@ public class CursorController : MonoBehaviour
                 ClearIndividualSelection(hit.collider.gameObject);
                 return;
             }
-            selectable.IsSelected = true;
+            if(!Inputs.IsShiftSelectEnabled) ClearAllSelection();
             SelectedUnitsManager.CurrentSelection.Add(hit.collider.gameObject);
+            selectable.IsSelected = true;
         }
     }
 
     private void SelectObjects(Vector2 startPosition, Vector2 endPosition)
     {
-        if(!Inputs.IsShiftSelectEnabled) ClearAllSelection();
-        if (startPosition == endPosition) return; //if user did not move the mouse when selecting, return early to avoid issue with generating the rectangle
+        if (startPosition == endPosition)
+        {
+            SelectObject(Inputs.MousePosition); //Incase of delayed click and release, ensure single selection occurs
+            return;
+        }
         var verts = new Vector3[4];
         int i = 0;
         var corners = GenerateRectangle(startPosition, endPosition);
@@ -147,15 +169,35 @@ public class CursorController : MonoBehaviour
             }
             i++;
         }
-
+        
         selectionMesh = GenerateSelectionMesh(verts);
         selectionBox = gameObject.AddComponent<MeshCollider>();
         selectionBox.sharedMesh = selectionMesh;
         selectionBox.convex = true;
         selectionBox.isTrigger = true;
         
+        var bounds = selectionBox.bounds;
+        var colliders = Physics.OverlapBox(bounds.center, bounds.extents, Quaternion.identity);
+
+        bool clearedSelectionThisFrame = false;
+        foreach (Collider collider in colliders)
+        {
+            if (collider.gameObject.TryGetComponent(out IUnit selectable))
+            {
+                if (!Inputs.IsShiftSelectEnabled && !clearedSelectionThisFrame)
+                {
+                    ClearAllSelection();
+                    clearedSelectionThisFrame = true;
+                }
+                if (!SelectedUnitsManager.CurrentSelection.Contains(collider.gameObject))
+                {
+                    SelectedUnitsManager.CurrentSelection.Add(collider.gameObject);
+                    selectable.IsSelected = true;
+                }
+            }
+        }
+        
         Destroy(selectionBox, .02f);
-        isSelecting = false;
     }
 
     private void ClearAllSelection()
@@ -186,45 +228,10 @@ public class CursorController : MonoBehaviour
     
     private Vector2[] GenerateRectangle(Vector2 startPosition, Vector2 endPosition)
     {
-        Vector2 topLeft;
-        Vector2 topRight;
-        Vector2 bottomLeft;
-        Vector2 bottomRight;
-
-        if (startPosition.x < endPosition.x)
-        {
-            if (startPosition.y > endPosition.y)
-            {
-                topLeft = startPosition;
-                topRight = new Vector2(endPosition.x, startPosition.y);
-                bottomLeft = new Vector2(startPosition.x, endPosition.y);
-                bottomRight = endPosition;
-            }
-            else
-            {
-                topLeft = new Vector2(startPosition.x, endPosition.y);
-                topRight = endPosition;
-                bottomLeft = startPosition;
-                bottomRight = new Vector2(endPosition.x, startPosition.y);
-            }
-        }
-        else
-        {
-            if (startPosition.y > endPosition.y)
-            {
-                topLeft = new Vector2(endPosition.x, startPosition.y);
-                topRight = startPosition;
-                bottomLeft = endPosition;
-                bottomRight = new Vector2(startPosition.x, endPosition.y);
-            }
-            else
-            {
-                topLeft = endPosition;
-                topRight = new Vector2(startPosition.x, endPosition.y);
-                bottomLeft = new Vector2(endPosition.x, startPosition.y);
-                bottomRight = startPosition;
-            }
-        }
+        Vector2 topLeft = new Vector2(Mathf.Min(startPosition.x, endPosition.x), Mathf.Max(startPosition.y, endPosition.y));
+        Vector2 topRight = new Vector2(Mathf.Max(startPosition.x, endPosition.x), Mathf.Max(startPosition.y, endPosition.y));
+        Vector2 bottomLeft = new Vector2(Mathf.Min(startPosition.x, endPosition.x), Mathf.Min(startPosition.y, endPosition.y));
+        Vector2 bottomRight = new Vector2(Mathf.Max(startPosition.x, endPosition.x), Mathf.Min(startPosition.y, endPosition.y));
 
         Vector2[] corners = { topLeft, topRight, bottomLeft, bottomRight };
         return corners;
@@ -249,17 +256,5 @@ public class CursorController : MonoBehaviour
         selectionMesh.vertices = verts;
         selectionMesh.triangles = tris;
         return selectionMesh;
-    }
-
-    private void OnTriggerEnter(Collider other)
-    {
-        if (other.gameObject.TryGetComponent(out IUnit selectable))
-        {
-            if (!SelectedUnitsManager.CurrentSelection.Contains(other.gameObject))
-            {
-                SelectedUnitsManager.CurrentSelection.Add(other.gameObject);
-                selectable.IsSelected = true;   
-            }
-        }
     }
 }

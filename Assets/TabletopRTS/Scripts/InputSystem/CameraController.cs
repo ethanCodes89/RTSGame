@@ -1,10 +1,7 @@
 //Code came from: https://www.youtube.com/watch?v=3Y7TFN_DsoI
 //Referencing for future explanation
-
 using Sirenix.OdinInspector;
-using TabletopRTS.InputSystem;
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public struct CameraControllerInputs
 {
