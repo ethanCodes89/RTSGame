@@ -1,37 +1,26 @@
 using System;
 using TabletopRTS.Scripts.UnitBehavior;
 using UnityEngine;
+using UnityEngine.AI;
 
 public class MoveComponent : MonoBehaviour
 {
     private float speed;
     private Vector3 currentDestination;
-
+    private NavMeshAgent agent;
     private void Start()
     {
         var unit = GetComponent<IUnit>();
         speed = unit.Speed;
         currentDestination = Vector3.zero;
+        agent = GetComponent<NavMeshAgent>();
     }
 
-    private void Update() //TODO: once path finding is implemented, this will need reworked
+    private void Update()
     {
         if (currentDestination != Vector3.zero)
         {
-            Vector3 direction = currentDestination - gameObject.transform.position;
-            direction.y = 0f;
-
-            float movementAmount = speed * Time.deltaTime;
-
-            if (direction.magnitude <= movementAmount)
-            {
-                gameObject.transform.position = currentDestination;
-                currentDestination = Vector3.zero;
-            }
-            else
-            {
-                gameObject.transform.position += direction.normalized * movementAmount;
-            }   
+            agent.destination = currentDestination; 
         }
     }
     

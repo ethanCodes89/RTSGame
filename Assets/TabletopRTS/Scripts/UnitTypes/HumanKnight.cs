@@ -5,13 +5,16 @@ using UnityEngine;
 
 public class HumanKnight : MonoBehaviour, IUnit
 {
+    [SerializeField] 
+    private int unitRank;
     [SerializeField]
-    private float health;
+    private int health;
     [SerializeField]
-    private float speed;
+    private int speed;
     private bool isSelected;
     
-    public float Health { get { return health;  } set { health = value; } } 
-    public float Speed { get { return speed;  } set { speed = value; } }
+    public int UnitRank { get { return unitRank; } }
+    public int Health { get { return health;  } set { health = value; } } 
+    public int Speed { get { return speed;  } set { speed = value; } }
     public bool IsSelected { get { return isSelected;  } set { isSelected = value; } }
 }

@@ -9,4 +9,6 @@ public class SelectedUnitsManager : MonoBehaviour
     {
         CurrentSelection = new List<GameObject>();
     }
+    //TODO: create UnitGroup structs or SingleUnit structs and set them up to run their course.
+    //TODO: add a function to sort the CurrentSelection list based on Unit ranks
 }
