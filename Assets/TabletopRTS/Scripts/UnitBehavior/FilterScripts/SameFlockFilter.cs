@@ -1,23 +1,25 @@
-using System.Collections;
 using System.Collections.Generic;
-using TabletopRTS.Scripts.UnitBehavior;
+using TabletopRTS.UnitBehavior;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Flock/Filter/Same Flock")]
-public class SameFlockFilter : ContextFilter
+namespace TabletopRTS.Flocking
 {
-    public override List<Transform> Filter(FlockAgent agent, List<Transform> original)
+    [CreateAssetMenu(menuName = "Flock/Filter/Same Flock")]
+    public class SameFlockFilter : ContextFilter
     {
-        List<Transform> filtered = new List<Transform>();
-        foreach (Transform item in original)
+        public override List<Transform> Filter(FlockAgent agent, List<Transform> original)
         {
-            FlockAgent itemAgent = item.GetComponent<FlockAgent>();
-            if (itemAgent != null && itemAgent.AgentFlock == agent.AgentFlock)
+            List<Transform> filtered = new List<Transform>();
+            foreach (Transform item in original)
             {
-                filtered.Add(item);
+                FlockAgent itemAgent = item.GetComponent<FlockAgent>();
+                if (itemAgent != null && itemAgent.AgentFlock == agent.AgentFlock)
+                {
+                    filtered.Add(item);
+                }
             }
-        }
 
-        return filtered;
-    }
+            return filtered;
+        }
+    }   
 }

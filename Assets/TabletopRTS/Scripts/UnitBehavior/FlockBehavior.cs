@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TabletopRTS.Scripts.UnitBehavior
+namespace TabletopRTS.Flocking
 {
     public abstract class FlockBehavior : ScriptableObject
     {

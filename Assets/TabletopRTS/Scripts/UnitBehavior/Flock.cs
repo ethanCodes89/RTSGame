@@ -1,14 +1,14 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TabletopRTS.Scripts.UnitBehavior
+namespace TabletopRTS.Flocking
 {
     public class Flock : MonoBehaviour
     {
         public FlockBehavior Behavior;
         
         private List<FlockAgent> agents = new List<FlockAgent>();
+        public List<FlockAgent> Agents { set { agents = value; } }
         private float maxSpeed;
         [Range(1f, 10f)] public float neighborRadius = 1.5f;
         [Range(0f, 1f)] public float avoidanceRadiusMultiplier = 0.5f;
@@ -19,17 +19,9 @@ namespace TabletopRTS.Scripts.UnitBehavior
         
         public float SquareAvoidanceRadius { get { return squareAvoidanceRadius; } }
 
-        Flock(List<FlockAgent> flockAgents)
-        {
-            agents = flockAgents;
-            foreach (FlockAgent agent in agents)
-            {
-                agent.SetFlock(this); //This will allow us to wipe any pre-existing flock data from the agent and let them switch flocks on the fly
-            }
-        }
-        
         private void Start()
         {
+            maxSpeed = CalculateMaxSpeed();
             squareMaxSpeed = maxSpeed * maxSpeed;
             squareNeighborRadius = neighborRadius * neighborRadius;
             squareAvoidanceRadius = squareNeighborRadius * avoidanceRadiusMultiplier * avoidanceRadiusMultiplier;
@@ -41,7 +33,11 @@ namespace TabletopRTS.Scripts.UnitBehavior
             {
                 List<Transform> context = GetNearbyObjects(agent);
                 Vector3 move = Behavior.CalculateMove(agent, context, this);
-                move = move.normalized * maxSpeed;
+                if (move.sqrMagnitude > squareMaxSpeed)
+                {
+                    move = move.normalized * maxSpeed;                    
+                }
+
                 agent.Move(move);
             }
         }
@@ -60,6 +56,18 @@ namespace TabletopRTS.Scripts.UnitBehavior
             }
 
             return context;
+        }
+
+        private float CalculateMaxSpeed()
+        {
+            float slowestSpeed = 0;
+            for (int i = 0; i < agents.Count; i++)
+            {
+                if (slowestSpeed > agents[i].Speed)
+                    slowestSpeed = agents[i].Speed;
+                i++;
+            }
+            return slowestSpeed;
         }
     }   
 }

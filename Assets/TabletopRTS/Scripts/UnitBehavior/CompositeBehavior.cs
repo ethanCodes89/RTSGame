@@ -1,39 +1,42 @@
-using System.Collections;
 using System.Collections.Generic;
-using TabletopRTS.Scripts.UnitBehavior;
+using TabletopRTS.UnitBehavior;
 using UnityEngine;
-[CreateAssetMenu(menuName = "Flock/Behavior/Composite")]
-public class CompositeBehavior : FlockBehavior
+
+namespace TabletopRTS.Flocking
 {
-    public FlockBehavior[] Behaviors;
-    public float[] weights;
-    
-    public override Vector3 CalculateMove(FlockAgent agent, List<Transform> context, Flock flock)
+    [CreateAssetMenu(menuName = "Flock/Behavior/Composite")]
+    public class CompositeBehavior : FlockBehavior
     {
-        if (weights.Length != Behaviors.Length)
+        public FlockBehavior[] Behaviors;
+        public float[] weights;
+    
+        public override Vector3 CalculateMove(FlockAgent agent, List<Transform> context, Flock flock)
         {
-            Debug.LogError("Data mismatch in " + name, this);
-            return Vector2.zero;   
-        }
-
-        Vector3 move = Vector3.zero;
-
-        for (int i = 0; i < Behaviors.Length; i++)
-        {
-            Vector3 partialMove = Behaviors[i].CalculateMove(agent, context, flock) * weights[i];
-
-            if (partialMove != Vector3.zero)
+            if (weights.Length != Behaviors.Length)
             {
-                if (partialMove.sqrMagnitude > weights[i] * weights[i])
-                {
-                    partialMove.Normalize();
-                    partialMove *= weights[i];
-                }
-
-                move += partialMove;
+                Debug.LogError("Data mismatch in " + name, this);
+                return Vector2.zero;   
             }
-        }
 
-        return move;
-    }
+            Vector3 move = Vector3.zero;
+
+            for (int i = 0; i < Behaviors.Length; i++)
+            {
+                Vector3 partialMove = Behaviors[i].CalculateMove(agent, context, flock) * weights[i];
+
+                if (partialMove != Vector3.zero)
+                {
+                    if (partialMove.sqrMagnitude > weights[i] * weights[i])
+                    {
+                        partialMove.Normalize();
+                        partialMove *= weights[i];
+                    }
+
+                    move += partialMove;
+                }
+            }
+
+            return move;
+        }
+    }   
 }

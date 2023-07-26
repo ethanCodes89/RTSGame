@@ -1,9 +1,9 @@
-using System.Collections;
-using System.Collections.Generic;
-using TabletopRTS.Scripts.UnitBehavior;
-using UnityEngine;
+using TabletopRTS.UnitBehavior;
 
-public abstract class FilteredFlockBehavior : FlockBehavior
+namespace TabletopRTS.Flocking
 {
-    public ContextFilter filter;
+    public abstract class FilteredFlockBehavior : FlockBehavior
+    {
+        public ContextFilter filter;
+    }   
 }

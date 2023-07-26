@@ -1,31 +1,33 @@
-using System;
-using TabletopRTS.Scripts.UnitBehavior;
+using TabletopRTS.UnitBehavior;
 using UnityEngine;
 using UnityEngine.AI;
 
-public class MoveComponent : MonoBehaviour
+namespace TabletopRTS.UnitBehavior
 {
-    private float speed;
-    private Vector3 currentDestination;
-    private NavMeshAgent agent;
-    private void Start()
+    public class MoveComponent : MonoBehaviour
     {
-        var unit = GetComponent<IUnit>();
-        speed = unit.Speed;
-        currentDestination = Vector3.zero;
-        agent = GetComponent<NavMeshAgent>();
-    }
-
-    private void Update()
-    {
-        if (currentDestination != Vector3.zero)
+        private float speed;
+        private Vector3 currentDestination;
+        private NavMeshAgent agent;
+        private void Start()
         {
-            agent.destination = currentDestination; 
+            var unit = GetComponent<IUnit>();
+            speed = unit.Speed;
+            currentDestination = Vector3.zero;
+            agent = GetComponent<NavMeshAgent>();
         }
-    }
+
+        private void Update()
+        {
+            if (currentDestination != Vector3.zero)
+            {
+                agent.destination = currentDestination; 
+            }
+        }
     
-    public void SetDestination(Vector3 destination)
-    {
-        currentDestination = destination;
-    }
+        public void SetDestination(Vector3 destination)
+        {
+            currentDestination = destination;
+        }
+    }   
 }

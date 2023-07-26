@@ -1,4 +1,4 @@
-namespace TabletopRTS.Scripts.UnitBehavior
+namespace TabletopRTS.UnitBehavior
 {
     public interface IUnit
     {

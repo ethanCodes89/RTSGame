@@ -1,14 +1,31 @@
 using System.Collections.Generic;
-using TabletopRTS.Scripts.UnitBehavior;
 using UnityEngine;
+using System.Linq;
+using TabletopRTS.Flocking;
 
 public class SelectedUnitsManager : MonoBehaviour
 {
     public List<GameObject> CurrentSelection;
+    [SerializeField] private GameObject FlockPrefab;
     private void Start()
     {
         CurrentSelection = new List<GameObject>();
     }
-    //TODO: create UnitGroup structs or SingleUnit structs and set them up to run their course.
-    //TODO: add a function to sort the CurrentSelection list based on Unit ranks
+
+    private void InstantiateFlock(List<GameObject> currentSelection, FlockBehavior behavior)
+    {
+        GameObject flockGameObject = Instantiate(FlockPrefab);
+        Flock flock = flockGameObject.GetComponent<Flock>();
+
+        if (flock)
+        {
+            flock.Behavior = behavior;
+            List<FlockAgent> flockList = CurrentSelection.Cast<FlockAgent>().ToList();
+            flock.Agents = flockList;
+            foreach(FlockAgent agent in flockList)
+            {
+                agent.SetFlock(flock);
+            }
+        }
+    }
 }

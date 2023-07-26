@@ -1,4 +1,4 @@
-using TabletopRTS.Scripts.UnitBehavior;
+using TabletopRTS.UnitBehavior;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 

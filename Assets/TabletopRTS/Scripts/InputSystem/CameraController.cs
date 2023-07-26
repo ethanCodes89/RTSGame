@@ -3,7 +3,9 @@
 using Sirenix.OdinInspector;
 using UnityEngine;
 
-public struct CameraControllerInputs
+namespace TabletopRTS.InputSystem
+{
+ public struct CameraControllerInputs
 {
     public Vector2 Movement;
     public Vector2 MousePosition;
@@ -170,4 +172,5 @@ public class CameraController : MonoBehaviour
 
         }
     }
+}   
 }

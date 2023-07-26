@@ -1,4 +1,4 @@
-using TabletopRTS.Scripts.UnitBehavior;
+using TabletopRTS.Flocking;
 using UnityEditor;
 using UnityEngine;
 

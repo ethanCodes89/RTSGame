@@ -1,28 +1,27 @@
-using System.Collections;
 using System.Collections.Generic;
-using TabletopRTS.Scripts.UnitBehavior;
-using Unity.VisualScripting;
-using UnityEditor.Rendering.LookDev;
+using TabletopRTS.UnitBehavior;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Flock/Behavior/Alignment")]
-public class AlignmentBehavior : FilteredFlockBehavior
+namespace TabletopRTS.Flocking
 {
-    public override Vector3 CalculateMove(FlockAgent agent, List<Transform> context, Flock flock)
+    [CreateAssetMenu(menuName = "Flock/Behavior/Alignment")]
+    public class AlignmentBehavior : FilteredFlockBehavior
     {
-        if (context.Count == 0)
-            return agent.transform.forward;
-
-        Vector3 alignmentMove = Vector3.zero;
-        List<Transform> filteredContext = filter == null ? context : filter.Filter(agent, context);
-        foreach (Transform item in filteredContext)
+        public override Vector3 CalculateMove(FlockAgent agent, List<Transform> context, Flock flock)
         {
-            alignmentMove += item.transform.forward;
+            if (context.Count == 0)
+                return agent.transform.forward;
+
+            Vector3 alignmentMove = Vector3.zero;
+            List<Transform> filteredContext = filter == null ? context : filter.Filter(agent, context);
+            foreach (Transform item in filteredContext)
+            {
+                alignmentMove += item.transform.forward;
+            }
+
+            alignmentMove /= context.Count;
+
+            return alignmentMove;
         }
-
-        alignmentMove /= context.Count;
-
-        return alignmentMove;
-    }
-        
+    }   
 }

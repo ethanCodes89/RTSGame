@@ -1,11 +1,10 @@
-using System.Collections.Generic;
-using System.Linq;
-using Sirenix.Utilities;
-using TabletopRTS.Scripts.UnitBehavior;
+using TabletopRTS.UnitBehavior;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public struct CursorControllerInputs
+namespace TabletopRTS.InputSystem
+{
+ public struct CursorControllerInputs
 {
     public Vector2 MousePosition;
     public InputAction CursorPrimaryCommand;
@@ -257,4 +256,5 @@ public class CursorController : MonoBehaviour
         selectionMesh.triangles = tris;
         return selectionMesh;
     }
+}   
 }

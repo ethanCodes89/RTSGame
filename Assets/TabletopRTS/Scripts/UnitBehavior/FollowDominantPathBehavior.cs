@@ -1,24 +1,25 @@
-using System.Collections;
 using System.Collections.Generic;
-using TabletopRTS.Scripts.UnitBehavior;
 using UnityEngine;
 
-[CreateAssetMenu(menuName = "Flock/Behavior/Stay In Radius")]
-public class FollowDominantPathBehavior : FlockBehavior
+namespace TabletopRTS.Flocking
 {
-    public Vector3 Center;
-    public float Radius = 5f;
-
-    public override Vector3 CalculateMove(FlockAgent agent, List<Transform> context, Flock flock)
+    [CreateAssetMenu(menuName = "Flock/Behavior/Stay In Radius")]
+    public class FollowDominantPathBehavior : FlockBehavior
     {
-        Vector3 CenterOffset = Center - agent.transform.position;
-        float t = CenterOffset.magnitude / Radius;
+        public Vector3 Center;
+        public float Radius = 5f;
 
-        if (t < 0.9f)
+        public override Vector3 CalculateMove(FlockAgent agent, List<Transform> context, Flock flock)
         {
-            return Vector3.zero;
-        }
+            Vector3 CenterOffset = Center - agent.transform.position;
+            float t = CenterOffset.magnitude / Radius;
 
-        return CenterOffset * t * t;
-    }
+            if (t < 0.9f)
+            {
+                return Vector3.zero;
+            }
+
+            return CenterOffset * t * t;
+        }
+    }   
 }
