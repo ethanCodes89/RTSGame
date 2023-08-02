@@ -8272,6 +8272,10 @@ PrefabInstance:
       value: Flock
       objectReference: {fileID: 0}
     - target: {fileID: 7349262621561610212, guid: 37bd30c63276fe442b7ddef3f3bd5741, type: 3}
+      propertyPath: Behavior
+      value: 
+      objectReference: {fileID: 11400000, guid: bcafe5417feceba409b4b3ed52ff122a, type: 2}
+    - target: {fileID: 7349262621561610212, guid: 37bd30c63276fe442b7ddef3f3bd5741, type: 3}
       propertyPath: neighborRadius
       value: 1
       objectReference: {fileID: 0}

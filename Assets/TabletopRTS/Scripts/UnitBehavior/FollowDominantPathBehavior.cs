@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace TabletopRTS.Flocking
 {
-    [CreateAssetMenu(menuName = "Flock/Behavior/Stay In Radius")]
+    [CreateAssetMenu(menuName = "Flock/Behavior/Stray Prevention")]
     public class FollowDominantPathBehavior : FlockBehavior
     {
         public Vector3 Center;
